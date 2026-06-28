@@ -281,8 +281,6 @@ jobs:
 
             # === SSH 配置 ===
             sed -i 's/#\?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
-            sed -i 's/#\?PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
-            sed -i 's/#\?KbdInteractiveAuthentication .*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
 
             echo '=== NetBird 安装完成 ==='
           " || { echo 'ERROR: NetBird installation failed'; sudo umount /mnt; sudo losetup -d $loop; exit 1; }
