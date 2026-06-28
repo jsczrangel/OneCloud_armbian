@@ -117,32 +117,22 @@ jobs:
         run: |
           echo "$(echo "${{ needs.prepare.outputs.env }}" | base64 -d)" >>$GITHUB_ENV
 
-      - name: 检查服务器信息
-        run: |
-          sudo timedatectl set-timezone "Asia/Shanghai"
-          echo "-------------------------------CPU信息-------------------------------------------"
-          echo
-          echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
-          echo "CPU核心及版本信息:$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c)"
-          echo
-          echo "-------------------------------内存信息-------------------------------------------"
-          echo
-          echo "已安装内存详细信息："
-          sudo lshw -short -C memory | grep GiB
-          echo
-          echo "-------------------------------硬盘信息--------------------------------------------"
-          echo
-          echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)"
-          echo "硬盘详情："
-          df -Th
-
       - name: 检查
         uses: actions/checkout@main
         with:
           repository: ${{ env.ARMBIAN_REPO }}
           ref: ${{ env.ARMBIAN_SHA }}
 
+      - name: 缓存 Armbian 构建
+        uses: actions/cache@v4
+        with:
+          path: output/
+          key: armbian-kernel-${{ env.ARMBIAN_SHA }}-${{ env.ARMBIAN_VERSION }}
+          restore-keys: |
+            armbian-kernel-${{ env.ARMBIAN_SHA }}-
+
       - name: 编译
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           sudo --preserve-env \
             ./compile.sh kernel \
@@ -215,6 +205,14 @@ jobs:
           echo "硬盘详情："
           df -Th
         
+      - name: 缓存 APT 包
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            apt-${{ runner.os }}-
+
       - name: 初始化环境
         run: |
           sudo timedatectl set-timezone "Asia/Shanghai"
