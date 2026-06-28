@@ -181,32 +181,16 @@ jobs:
             output/debs/*
 
   build:
-    name: 编译 ${{ matrix.RELEASE }}-current-${{ matrix.TYPE == 'desktop' && matrix.DESKTOP_ENVIRONMENT || matrix.TYPE }}
+    name: 编译 bookworm-current-minimal
     needs: [ prepare, build-kernel ]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         RELEASE:
-          # - focal # Ubuntu 20.04 LTS
-          # - jammy # Ubuntu 22.04 LTS
-          - noble # Ubuntu 24.04 LTS
-          #- oracular # Ubuntu 24.10
-          - plucky # Ubuntu 25.04
-          # - buster # Debian 10
-          # - bullseye # Debian 11
           - bookworm # Debian 12
-          - trixie # Debian 13
-          #- sid # Debian unstable
         TYPE:
           - minimal
-          - cli
-          - desktop
-        include:
-          - TYPE: desktop
-            DESKTOP_ENVIRONMENT: xfce
-            DESKTOP_ENVIRONMENT_CONFIG_NAME: config_base
-            DESKTOP_APPGROUPS_SELECTED: ""
 
     steps:
       - name: 引入环境参数
@@ -258,19 +242,15 @@ jobs:
               ALLOW_ROOT=yes \
               BOARD=onecloud \
               BRANCH=current \
-              RELEASE=${{ matrix.RELEASE }} \
+              RELEASE=bookworm \
               KERNEL_CONFIGURE=no \
-              BUILD_MINIMAL=${{ matrix.TYPE == 'minimal' && 'yes' || 'no' }} \
-              BUILD_DESKTOP=${{ matrix.TYPE == 'desktop' && 'yes' || 'no' }} \
-              DESKTOP_ENVIRONMENT=${{ matrix.DESKTOP_ENVIRONMENT }} \
-              DESKTOP_ENVIRONMENT_CONFIG_NAME=${{ matrix.DESKTOP_ENVIRONMENT_CONFIG_NAME }} \
-              DESKTOP_APPGROUPS_SELECTED=${{ matrix.DESKTOP_APPGROUPS_SELECTED }} \
+              BUILD_MINIMAL=yes \
+              BUILD_DESKTOP=no \
               EXPERT=yes \
               COMPRESS_OUTPUTIMAGE=img
           sudo chown $(id -u):$(id -g) -R output/
 
       - name: 安装 NetBird
-        if: matrix.TYPE == 'minimal'
         run: |
           # 挂载镜像
           diskimg=$(ls output/images/*.img)
@@ -397,7 +377,7 @@ jobs:
       - name: 上传资料
         uses: actions/upload-artifact@main
         with:
-          name: ${{ matrix.RELEASE }}-current-${{ matrix.TYPE == 'desktop' && matrix.DESKTOP_ENVIRONMENT || matrix.TYPE }}
+          name: bookworm-current-minimal
           path: output/images/*
 
       - name: 生成发布信息
