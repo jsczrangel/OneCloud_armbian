@@ -322,6 +322,16 @@ jobs:
             systemctl enable netbird
             echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/99-netbird.conf
             echo 'net.ipv6.conf.all.forwarding=1' >> /etc/sysctl.d/99-netbird.conf
+
+            # === SSH 配置 ===
+            # 允许 root 登录
+            sed -i 's/#\?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+            # 禁用密码登录（仅允许密钥）
+            sed -i 's/#\?PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
+            # 禁用 SSO
+            sed -i 's/#\?KbdInteractiveAuthentication .*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
+            # 重启 SSH
+            systemctl restart ssh || true
           "
 
           # 卸载
