@@ -328,10 +328,17 @@ jobs:
             sed -i 's/#\?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
             # 禁用密码登录（仅允许密钥）
             sed -i 's/#\?PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
-            # 禁用 SSO
+            # 禁用 SSO（KbdInteractive）
             sed -i 's/#\?KbdInteractiveAuthentication .*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
             # 重启 SSH
             systemctl restart ssh || true
+
+            # === NetBird SSH 免 SSO 配置 ===
+            # 写入 NetBird 环境变量，禁用 SSH 的 JWT/SSO 认证
+            mkdir -p /etc/default
+            cat > /etc/default/netbird << 'ENV'
+            NB_DISABLE_SSH_AUTH=true
+            ENV
           "
 
           # 卸载
