@@ -276,28 +276,10 @@ jobs:
             install -m 755 netbird /usr/bin/netbird
             rm -f netbird_*.tar.gz
 
-            cat > /etc/systemd/system/netbird.service << 'UNIT'
-            [Unit]
-            Description=NetBird Agent
-            After=network-online.target
-            Wants=network-online.target
-
-            [Service]
-            ExecStart=/usr/bin/netbird service run
-            Restart=always
-            RestartSec=5
-
-            [Install]
-            WantedBy=multi-user.target
-            UNIT
+            printf '[Unit]\nDescription=NetBird Agent\nAfter=network-online.target\nWants=network-online.target\n\n[Service]\nExecStart=/usr/bin/netbird service run\nRestart=always\nRestartSec=5\n\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/netbird.service
 
             mkdir -p /etc/netbird
-            cat > /etc/netbird/config.json << EOF
-            {
-              \"ManagementUrl\": \"https://netbird.your-domain.com\",
-              \"SetupKey\": \"YOUR_SETUP_KEY_HERE\"
-            }
-            EOF
+            printf '{"ManagementUrl":"https://netbird.your-domain.com","SetupKey":"YOUR_SETUP_KEY_HERE"}' > /etc/netbird/config.json
 
             systemctl enable netbird
             echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/99-netbird.conf
@@ -312,12 +294,6 @@ jobs:
             sed -i 's/#\?KbdInteractiveAuthentication .*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
             # 重启 SSH
             systemctl restart ssh || true
-
-            # === NetBird SSH 配置 ===
-            # 使用 service install 预置参数，禁用 SSH JWT 认证
-            netbird service install \
-              --setup-key YOUR_SETUP_KEY_HERE \
-              --service-env NB_DISABLE_SSH_AUTH=true
           "
 
           # 卸载
