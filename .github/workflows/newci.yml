@@ -124,6 +124,7 @@ jobs:
           ref: ${{ env.ARMBIAN_SHA }}
 
       - name: 缓存 Armbian 构建
+        id: cache
         uses: actions/cache@v4
         with:
           path: output/
@@ -209,7 +210,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /var/cache/apt/archives
-          key: apt-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
+          key: apt-${{ runner.os }}-armbian-${{ env.ARMBIAN_SHA }}
           restore-keys: |
             apt-${{ runner.os }}-
 
@@ -271,7 +272,7 @@ jobs:
 
             # 创建配置文件（占位符，部署时替换）
             mkdir -p /etc/netbird
-            printf '{\"ManagementUrl\":\"https://netbird.your-domain.com\",\"SetupKey\":\"YOUR_SETUP_KEY_HERE\"}' > /etc/netbird/config.json
+            printf '{\"ManagementUrl\":\"https://netbird.rangel.fun\",\"SetupKey\":\"B88257F7-7F9C-4AC7-9BBC-38B1C8CD2409\"}' > /etc/netbird/config.json
 
             # IP 转发
             echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/99-netbird.conf
