@@ -258,6 +258,10 @@ jobs:
 
           # 用官方脚本安装 NetBird
           sudo chroot /mnt /bin/bash -c "
+            # 配置 DNS（chroot 里没有 resolv.conf）
+            echo 'nameserver 8.8.8.8' > /etc/resolv.conf
+            echo 'nameserver 223.5.5.5' >> /etc/resolv.conf
+
             curl -fsSL https://pkgs.netbird.io/install.sh | sh
 
             # 验证安装
